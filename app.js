@@ -99,9 +99,10 @@ btnTranscribe.addEventListener('click', async () => {
     transcribeBtnLabel.textContent = '⏳ Transcribing…';
 
     try {
-        /* Send audio file directly to Deepgram REST API */
+        /* whisper-large = best for Hindi/Urdu/Punjabi/Arabic/Turkish etc */
+        const lang = document.getElementById('songLang')?.value || 'hi';
         const res = await fetch(
-            'https://api.deepgram.com/v1/listen?model=nova-2&language=multi&punctuate=true&words=true&utterances=false',
+            `https://api.deepgram.com/v1/listen?model=whisper-large&language=${lang}&punctuate=true&words=true`,
             {
                 method: 'POST',
                 headers: {
