@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rhythm Caption Generator</title>
+    <title>Rhythm Beat Visualizer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="glass-container">
         <header>
-            <h1>Rhythm <span class="gradient-text">Captions</span></h1>
-            <p>Upload audio, sync the beat, and download transparent caption videos.</p>
+            <h1>Rhythm <span class="gradient-text">Visuals</span></h1>
+            <p>Upload any song. The visual elements will auto-sync with the rhythm & bass perfectly.</p>
         </header>
 
         <main class="app-body">
@@ -19,43 +19,51 @@
                 <input type="file" id="audioUpload" accept="audio/*, video/*" hidden>
                 <div class="drop-zone-content">
                     <div class="upload-icon">🎵</div>
-                    <p>Tap to <span>Browse File</span></p>
-                    <small>Supports any MP3, Audio or MP4 track</small>
+                    <p>Tap to <span>Upload Song</span></p>
+                    <small>Supports PagalWorld MP3s & local files</small>
                 </div>
             </div>
 
+            <!-- Controls Section -->
             <div class="controls-card hidden" id="controlsCard">
                 <div class="file-badge">
                     <span id="fileInfo">Filename.mp3</span>
-                    <button id="btnReset" class="close-badge" title="Remove file">&times;</button>
+                    <button id="btnReset" class="close-badge">&times;</button>
                 </div>
                 
                 <div class="settings-grid">
                     <div class="setting-item">
                         <label for="bgType">Background Mode</label>
                         <select id="bgType">
-                            <option value="transparent">Transparent (WebM - for PC editors)</option>
-                            <option value="green">Chroma Green Screen (MP4 - for Mobile/CapCut)</option>
+                            <option value="green">Chroma Green Screen (MP4 - Best for CapCut/Phone)</option>
+                            <option value="transparent">Transparent Background (WebM - for PC)</option>
                         </select>
                     </div>
                     <div class="setting-item">
-                        <label for="captionText">Enter Captions (Comma Separated)</label>
-                        <textarea id="captionText" placeholder="Word, by, word, caption, sync, test..."></textarea>
+                        <label for="visualStyle">Rhythm Visual Style</label>
+                        <select id="visualStyle">
+                            <option value="hype">🔥 Hype Elements (Beat Sync)</option>
+                            <option value="neon">⚡ Neon Ring Pulse</option>
+                            <option value="combined">👑 Ultimate Rhythm Mix</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <button id="btnPlay" class="btn btn-secondary">Play Preview</button>
-                    <button id="btnRender" class="btn btn-primary">Generate & Download</button>
+                    <button id="btnPlay" class="btn btn-secondary">Listen Beat</button>
+                    <button id="btnRender" class="btn btn-primary">Generate Video</button>
                 </div>
             </div>
 
+            <!-- Canvas Preview Area -->
             <div class="preview-box hidden" id="previewBox">
                 <canvas id="videoCanvas" width="1080" height="1920"></canvas>
+                <p class="render-status">Recording rhythm graphics in real-time...</p>
             </div>
         </main>
     </div>
 
+    <!-- Your Requested Custom Footer -->
     <footer>
         <p>Web Developer: <span class="dev-name">Debangsh bio-wala</span></p>
         <p class="funny-content">nahi mila ga 🤣</p>
