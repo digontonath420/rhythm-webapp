@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Caption Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="glass-container">
+        <header>
+            <h1>Rhythm <span class="gradient-text">Captions</span></h1>
+            <p>Upload audio, sync the beat, and download transparent caption videos.</p>
+        </header>
+
+        <main class="app-body">
+            <div class="drop-zone" id="dropZone">
+                <input type="file" id="audioUpload" accept="audio/mp3, audio/mpeg, video/mp4" hidden>
+                <div class="drop-zone-content">
+                    <div class="upload-icon">🎵</div>
+                    <p>Drag & Drop or <span>Browse File</span></p>
+                    <small>Supports MP3 or MP4 (Audio track extraction)</small>
+                </div>
+            </div>
+
+            <div class="controls-card hidden" id="controlsCard">
+                <div class="file-info" id="fileInfo">Filename.mp3</div>
+                
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="bgType">Background Mode</label>
+                        <select id="bgType">
+                            <option value="transparent">Transparent (WebM)</option>
+                            <option value="green">Chroma Green Screen (MP4)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="captionText">Enter Captions (Comma Separated)</label>
+                        <textarea id="captionText" placeholder="Word, by, word, caption, sync, test..."></textarea>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="btnPlay" class="btn btn-secondary">Preview Rhythm</button>
+                    <button id="btnRender" class="btn btn-primary">Generate & Download</button>
+                </div>
+            </div>
+
+            <div class="preview-box hidden" id="previewBox">
+                <canvas id="videoCanvas" width="1080" height="1920"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Developed with ❤️ by <span class="dev-name">Debangsh bio-wala</span></p>
+        <p class="funny-content">Nahi mila ga 🤣</p>
+        <p class="support-text">Support developer by giving him a girl friend</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
