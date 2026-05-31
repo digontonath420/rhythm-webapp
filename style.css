@@ -1,13 +1,12 @@
-/* Premium Capsule Palette from Image */
 :root {
-    --color-dark: #2A0800;       /* Obsidian Top Capsule */
-    --color-muted: #775144;      /* Deep Brownish Gray */
-    --color-accent: #C09891;     /* Soft Rose/Taupe */
-    --color-gray: #BEA8A7;       /* Pastel Plaster */
-    --color-light: #F4DBD8;      /* Silk Base White */
-    --radius-capsule: 100px;     /* Exact capsule symmetry from image */
-    --radius-card: 32px;         /* Smooth container curves */
-    --shadow-premium: 0 30px 60px rgba(42, 8, 0, 0.15), 0 4px 12px rgba(42, 8, 0, 0.05);
+    --color-dark: #2A0800;       
+    --color-muted: #775144;      
+    --color-accent: #C09891;     
+    --color-gray: #BEA8A7;       
+    --color-light: #F4DBD8;      
+    --radius-capsule: 100px;
+    --radius-card: 32px;
+    --shadow-premium: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -19,8 +18,8 @@
 }
 
 body {
-    background: radial-gradient(circle at center, #ffffff 0%, var(--color-light) 100%);
-    color: var(--color-dark);
+    background: linear-gradient(135deg, #120300 0%, var(--color-dark) 60%, #000000 100%);
+    color: var(--color-light);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -29,67 +28,63 @@ body {
     padding: 20px;
 }
 
-/* God Level Premium Container */
 .glass-container {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(192, 152, 145, 0.4);
+    background: rgba(42, 8, 0, 0.7);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(192, 152, 145, 0.2);
     border-radius: var(--radius-card);
     width: 100%;
-    max-width: 540px;
+    max-width: 500px;
     padding: 35px 25px;
     box-shadow: var(--shadow-premium);
     margin: auto 0;
 }
 
 header h1 {
-    font-size: 2.3rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    letter-spacing: -1px;
     text-align: center;
     margin-bottom: 6px;
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-muted) 100%);
+    background: linear-gradient(135deg, var(--color-light) 0%, var(--color-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 header p {
-    color: var(--color-muted);
+    color: var(--color-gray);
     text-align: center;
-    font-size: 0.9rem;
-    margin-bottom: 30px;
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+    line-height: 1.4;
 }
 
-/* Dynamic Dropzone Area */
 .drop-zone {
     border: 2px dashed var(--color-accent);
     border-radius: var(--radius-card);
-    padding: 45px 20px;
+    padding: 50px 20px;
     text-align: center;
     cursor: pointer;
-    background: rgba(244, 219, 216, 0.2);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(119, 81, 68, 0.15);
+    transition: all 0.3s;
 }
 
 .drop-zone:hover {
-    background: rgba(192, 152, 145, 0.2);
-    border-color: var(--color-dark);
-    transform: scale(0.99);
+    border-color: #ffffff;
+    background: rgba(192, 152, 145, 0.1);
 }
 
 .upload-icon {
-    font-size: 3.5rem;
-    margin-bottom: 12px;
+    font-size: 3.2rem;
+    margin-bottom: 10px;
 }
 
-/* Capsule File Badge with Cross Icon */
 .file-badge {
-    background: var(--color-dark);
-    color: var(--color-light);
+    background: var(--color-light);
+    color: var(--color-dark);
     padding: 8px 16px;
     border-radius: var(--radius-capsule);
     font-size: 0.85rem;
@@ -97,12 +92,12 @@ header p {
     align-items: center;
     gap: 10px;
     margin-bottom: 25px;
-    box-shadow: 0 4px 12px rgba(42, 8, 0, 0.2);
+    font-weight: 600;
 }
 
 .close-badge {
-    background: var(--color-muted);
-    color: var(--color-light);
+    background: var(--color-accent);
+    color: var(--color-dark);
     border: none;
     width: 20px;
     height: 20px;
@@ -112,56 +107,36 @@ header p {
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
-    transition: background 0.2s;
+    font-weight: bold;
 }
 
-.close-badge:hover {
-    background: #ff4a4a;
-    color: white;
-}
-
-/* Forms & Select Fields */
 .settings-grid {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    margin-bottom: 30px;
+    gap: 16px;
+    margin-bottom: 25px;
 }
 
 label {
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--color-dark);
-    margin-bottom: 6px;
+    color: var(--color-gray);
+    margin-bottom: 5px;
     display: block;
 }
 
-select, textarea {
+select {
     width: 100%;
-    padding: 16px;
-    border: 1px solid var(--color-gray);
-    border-radius: 16px;
-    background: white;
-    color: var(--color-dark);
+    padding: 15px;
+    border: 1px solid rgba(192, 152, 145, 0.3);
+    border-radius: 14px;
+    background: rgba(18, 3, 0, 0.6);
+    color: #ffffff;
     font-size: 0.95rem;
     outline: none;
-    transition: all 0.3s;
 }
 
-select:focus, textarea:focus {
-    border-color: var(--color-muted);
-    box-shadow: 0 0 0 4px rgba(119, 81, 68, 0.15);
-}
-
-textarea {
-    height: 90px;
-    resize: none;
-}
-
-/* Capsule Style Buttons */
 .action-buttons {
     display: flex;
     gap: 12px;
@@ -169,85 +144,75 @@ textarea {
 
 .btn {
     flex: 1;
-    padding: 16px 24px;
+    padding: 16px;
     border: none;
     border-radius: var(--radius-capsule);
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s;
 }
 
 .btn-primary {
-    background: var(--color-dark);
-    color: white;
-    box-shadow: 0 8px 20px rgba(42, 8, 0, 0.25);
-}
-
-.btn-primary:hover {
-    background: #000;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(42, 8, 0, 0.35);
-}
-
-.btn-secondary {
-    background: var(--color-accent);
+    background: var(--color-light);
     color: var(--color-dark);
 }
 
-.btn-secondary:hover {
-    background: var(--color-gray);
-    transform: translateY(-2px);
+.btn-secondary {
+    background: rgba(119, 81, 68, 0.5);
+    color: var(--color-light);
+    border: 1px solid rgba(192, 152, 145, 0.2);
 }
 
 .hidden { display: none !important; }
 
-/* Video Preview Canvas Layer */
 #videoCanvas {
     width: 140px;
     height: 248px;
     border-radius: 16px;
-    box-shadow: var(--shadow-premium);
-    margin: 25px auto 0 auto;
+    background: #000;
+    margin: 20px auto 10px auto;
     display: block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-/* Footer Design styling */
+.render-status {
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    text-align: center;
+}
+
 footer {
     text-align: center;
-    margin-top: 35px;
+    margin-top: 30px;
     padding-top: 15px;
-    border-top: 1px solid rgba(42, 8, 0, 0.06);
+    border-top: 1px solid rgba(244, 219, 216, 0.1);
     width: 100%;
 }
 
 footer p {
     font-size: 0.85rem;
-    color: var(--color-muted);
+    color: var(--color-gray);
 }
 
 .dev-name {
     font-weight: 800;
-    color: var(--color-dark);
+    color: var(--color-light);
 }
 
 .funny-content {
     font-weight: bold;
     font-size: 1.1rem !important;
-    margin: 6px 0;
+    margin: 5px 0;
+    color: #ffffff;
 }
 
 .support-text {
     font-style: italic;
     font-size: 0.8rem !important;
-    opacity: 0.85;
+    opacity: 0.75;
 }
 
 @media (max-width: 480px) {
-    .action-buttons {
-        flex-direction: column;
-    }
-    .glass-container {
-        padding: 25px 20px;
-    }
+    .action-buttons { flex-direction: column; }
 }
