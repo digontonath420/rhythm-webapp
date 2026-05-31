@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Rhythm Beat Visualizer</title>
+    <title>Rhythm Captions</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -12,60 +12,91 @@
 
 <div class="card">
     <header>
-        <h1>RHYTHM <span>VISUALS</span></h1>
-        <p>Upload any song — visuals auto-sync to bass & rhythm</p>
+        <h1>RHYTHM <span>CAPTIONS</span></h1>
+        <p>Upload a song — AI detects lyrics & syncs captions to the beat</p>
     </header>
 
     <main>
-        <!-- Drop Zone -->
-        <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload audio file">
-            <input type="file" id="audioUpload" accept="audio/*,video/*" hidden>
-            <div class="icon">🎵</div>
-            <p>Tap to upload song</p>
-            <small>MP3 / AAC / OGG / M4A</small>
+
+        <!-- STEP 1: API KEY -->
+        <div class="step-block" id="stepApiKey">
+            <label for="apiKeyInput">OpenAI API Key <span class="tag">required for transcription</span></label>
+            <div class="input-row">
+                <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off" spellcheck="false">
+                <button class="btn btn-ghost" id="btnToggleKey" title="Show/hide">👁</button>
+            </div>
+            <p class="hint">Key stays in your browser only — never sent anywhere except OpenAI.</p>
         </div>
 
-        <!-- Controls -->
+        <hr class="divider">
+
+        <!-- STEP 2: UPLOAD -->
+        <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload audio">
+            <input type="file" id="audioUpload" accept="audio/*" hidden>
+            <div class="icon">🎵</div>
+            <p>Tap to upload song</p>
+            <small>MP3 / AAC / OGG / M4A — max 25 MB</small>
+        </div>
+
+        <!-- After upload: file badge + settings -->
         <div class="hidden" id="controlsCard">
             <div class="file-badge">
                 <span id="fileInfo">file.mp3</span>
-                <button id="btnReset" class="btn-close" aria-label="Remove file">&times;</button>
+                <button id="btnReset" class="btn-close" aria-label="Remove">&times;</button>
             </div>
 
             <div class="settings-grid">
                 <div>
-                    <label for="bgType">Background Mode</label>
+                    <label for="bgType">Background</label>
                     <select id="bgType">
-                        <option value="green">Chroma Green Screen (MP4 — CapCut/Phone)</option>
-                        <option value="transparent">Transparent (WebM — PC/Editors)</option>
+                        <option value="green">Chroma Green Screen (CapCut / Phone)</option>
+                        <option value="black">Black Background</option>
+                        <option value="transparent">Transparent WebM (PC editors)</option>
                     </select>
                 </div>
                 <div>
-                    <label for="visualStyle">Visual Style</label>
-                    <select id="visualStyle">
-                        <option value="hype">🔥 Hype Elements (Beat Sync)</option>
-                        <option value="neon">⚡ Neon Ring Pulse</option>
-                        <option value="combined">👑 Ultimate Rhythm Mix</option>
+                    <label for="captionStyle">Caption Style</label>
+                    <select id="captionStyle">
+                        <option value="word">Word-by-word pop</option>
+                        <option value="line">Full line fade</option>
+                        <option value="karaoke">Karaoke highlight</option>
                     </select>
                 </div>
             </div>
 
+            <!-- Transcribe button -->
+            <button class="btn btn-primary full" id="btnTranscribe">
+                <span id="transcribeBtnLabel">✦ Detect Lyrics with AI</span>
+            </button>
+        </div>
+
+        <!-- Transcription result -->
+        <div class="hidden" id="lyricsPreviewBlock">
+            <hr class="divider">
+            <label>Detected Lyrics <span class="tag">tap to edit</span></label>
+            <textarea id="lyricsEditor" rows="6" spellcheck="true"></textarea>
+            <p class="hint" id="lyricsHint"></p>
+
             <div class="action-buttons">
-                <button id="btnPlay" class="btn btn-secondary">▶ Preview</button>
-                <button id="btnRender" class="btn btn-primary">Generate ↓</button>
+                <button class="btn btn-secondary" id="btnPreview">▶ Preview</button>
+                <button class="btn btn-primary"   id="btnRender">Generate ↓</button>
             </div>
         </div>
 
-        <!-- Preview / Recording -->
+        <!-- Canvas preview -->
         <div class="preview-box hidden" id="previewBox">
             <hr class="divider">
             <canvas id="videoCanvas" width="540" height="960"></canvas>
             <div class="render-row">
-                <div class="render-dot"></div>
+                <div class="render-dot" id="renderDot"></div>
                 <span class="render-status" id="renderStatus">Recording…</span>
             </div>
-            <button class="btn-stop" id="btnStop">■ Stop &amp; Download</button>
+            <div class="action-buttons" style="margin-top:10px;">
+                <button class="btn btn-secondary" id="btnStopPreview">■ Stop Preview</button>
+                <button class="btn btn-ghost"     id="btnStopRender" style="display:none;">■ Stop &amp; Save</button>
+            </div>
         </div>
+
     </main>
 </div>
 
