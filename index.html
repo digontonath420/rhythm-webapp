@@ -2,74 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Rhythm Beat Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="glass-container">
-        <header>
-            <h1>Rhythm <span class="gradient-text">Visuals</span></h1>
-            <p>Upload any song. The visual elements will auto-sync with the rhythm & bass perfectly.</p>
-        </header>
+<div class="card">
+    <header>
+        <h1>RHYTHM <span>VISUALS</span></h1>
+        <p>Upload any song — visuals auto-sync to bass & rhythm</p>
+    </header>
 
-        <main class="app-body">
-            <div class="drop-zone" id="dropZone">
-                <input type="file" id="audioUpload" accept="audio/*, video/*" hidden>
-                <div class="drop-zone-content">
-                    <div class="upload-icon">🎵</div>
-                    <p>Tap to <span>Upload Song</span></p>
-                    <small>Supports PagalWorld MP3s & local files</small>
+    <main>
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload audio file">
+            <input type="file" id="audioUpload" accept="audio/*,video/*" hidden>
+            <div class="icon">🎵</div>
+            <p>Tap to upload song</p>
+            <small>MP3 / AAC / OGG / M4A</small>
+        </div>
+
+        <!-- Controls -->
+        <div class="hidden" id="controlsCard">
+            <div class="file-badge">
+                <span id="fileInfo">file.mp3</span>
+                <button id="btnReset" class="btn-close" aria-label="Remove file">&times;</button>
+            </div>
+
+            <div class="settings-grid">
+                <div>
+                    <label for="bgType">Background Mode</label>
+                    <select id="bgType">
+                        <option value="green">Chroma Green Screen (MP4 — CapCut/Phone)</option>
+                        <option value="transparent">Transparent (WebM — PC/Editors)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="visualStyle">Visual Style</label>
+                    <select id="visualStyle">
+                        <option value="hype">🔥 Hype Elements (Beat Sync)</option>
+                        <option value="neon">⚡ Neon Ring Pulse</option>
+                        <option value="combined">👑 Ultimate Rhythm Mix</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Controls Section -->
-            <div class="controls-card hidden" id="controlsCard">
-                <div class="file-badge">
-                    <span id="fileInfo">Filename.mp3</span>
-                    <button id="btnReset" class="close-badge">&times;</button>
-                </div>
-                
-                <div class="settings-grid">
-                    <div class="setting-item">
-                        <label for="bgType">Background Mode</label>
-                        <select id="bgType">
-                            <option value="green">Chroma Green Screen (MP4 - Best for CapCut/Phone)</option>
-                            <option value="transparent">Transparent Background (WebM - for PC)</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label for="visualStyle">Rhythm Visual Style</label>
-                        <select id="visualStyle">
-                            <option value="hype">🔥 Hype Elements (Beat Sync)</option>
-                            <option value="neon">⚡ Neon Ring Pulse</option>
-                            <option value="combined">👑 Ultimate Rhythm Mix</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button id="btnPlay" class="btn btn-secondary">Listen Beat</button>
-                    <button id="btnRender" class="btn btn-primary">Generate Video</button>
-                </div>
+            <div class="action-buttons">
+                <button id="btnPlay" class="btn btn-secondary">▶ Preview</button>
+                <button id="btnRender" class="btn btn-primary">Generate ↓</button>
             </div>
+        </div>
 
-            <!-- Canvas Preview Area -->
-            <div class="preview-box hidden" id="previewBox">
-                <canvas id="videoCanvas" width="1080" height="1920"></canvas>
-                <p class="render-status">Recording rhythm graphics in real-time...</p>
+        <!-- Preview / Recording -->
+        <div class="preview-box hidden" id="previewBox">
+            <hr class="divider">
+            <canvas id="videoCanvas" width="540" height="960"></canvas>
+            <div class="render-row">
+                <div class="render-dot"></div>
+                <span class="render-status" id="renderStatus">Recording…</span>
             </div>
-        </main>
+            <button class="btn-stop" id="btnStop">■ Stop &amp; Download</button>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <p class="dev-line">Web Developer: <strong>Debangsh bio-wala</strong></p>
+    <div class="contact-block">
+        <p class="contact-label">Contacts</p>
+        <p class="contact-line"><strong>nahi mila ga</strong> 🤣</p>
     </div>
+    <p class="support-text">Support dev by giving him a girlfriend 💀</p>
+</footer>
 
-    <!-- Your Requested Custom Footer -->
-    <footer>
-        <p>Web Developer: <span class="dev-name">Debangsh bio-wala</span></p>
-        <p class="funny-content">nahi mila ga 🤣</p>
-        <p class="support-text">Support developer by giving him a girlfriend</p>
-    </footer>
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
