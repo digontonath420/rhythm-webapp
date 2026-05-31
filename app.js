@@ -1,23 +1,17 @@
 /* ═══════════════════════════════════════════════
    RHYTHM CAPTIONS — app.js
-   Flow:
-   1. User enters OpenAI API key
-   2. Uploads MP3 (≤25 MB)
-   3. File sent to Whisper API → returns word-level timestamps
-   4. Lyrics shown in editable textarea
-   5. Preview (canvas plays + audio, no recording) with Stop button
-   6. Generate → canvas recorded → download video
+   Transcription: Deepgram API (FREE — no credit card)
+   Key milegi: console.deepgram.com (free signup)
 ═══════════════════════════════════════════════ */
 
-/* ── STATE ── */
 let audioUrl      = null;
 let audioFile     = null;
-let segments      = [];   // [{word, start, end}]
+let segments      = [];
 let audioCtx      = null;
 let analyser      = null;
 let sourceNode    = null;
 let activeAudio   = null;
-let isRunning     = false;  // preview OR render active
+let isRunning     = false;
 let isRecording   = false;
 let mediaRecorder = null;
 let rafId         = null;
@@ -25,30 +19,30 @@ let rafId         = null;
 const CANVAS_W = 540;
 const CANVAS_H = 960;
 
-/* ── DOM ── */
-const canvas       = document.getElementById('videoCanvas');
-const ctx          = canvas.getContext('2d', { willReadFrequently: false });
+const canvas = document.getElementById('videoCanvas');
+const ctx    = canvas.getContext('2d', { willReadFrequently: false });
 canvas.width  = CANVAS_W;
 canvas.height = CANVAS_H;
 
-const apiKeyInput      = document.getElementById('apiKeyInput');
-const btnToggleKey     = document.getElementById('btnToggleKey');
-const dropZone         = document.getElementById('dropZone');
-const audioUpload      = document.getElementById('audioUpload');
-const controlsCard     = document.getElementById('controlsCard');
-const btnReset         = document.getElementById('btnReset');
-const btnTranscribe    = document.getElementById('btnTranscribe');
+/* ── DOM ── */
+const apiKeyInput        = document.getElementById('apiKeyInput');
+const btnToggleKey       = document.getElementById('btnToggleKey');
+const dropZone           = document.getElementById('dropZone');
+const audioUpload        = document.getElementById('audioUpload');
+const controlsCard       = document.getElementById('controlsCard');
+const btnReset           = document.getElementById('btnReset');
+const btnTranscribe      = document.getElementById('btnTranscribe');
 const transcribeBtnLabel = document.getElementById('transcribeBtnLabel');
-const lyricsBlock      = document.getElementById('lyricsPreviewBlock');
-const lyricsEditor     = document.getElementById('lyricsEditor');
-const lyricsHint       = document.getElementById('lyricsHint');
-const previewBox       = document.getElementById('previewBox');
-const renderStatus     = document.getElementById('renderStatus');
-const btnPreview       = document.getElementById('btnPreview');
-const btnRender        = document.getElementById('btnRender');
-const btnStopPreview   = document.getElementById('btnStopPreview');
-const btnStopRender    = document.getElementById('btnStopRender');
-const renderDot        = document.getElementById('renderDot');
+const lyricsBlock        = document.getElementById('lyricsPreviewBlock');
+const lyricsEditor       = document.getElementById('lyricsEditor');
+const lyricsHint         = document.getElementById('lyricsHint');
+const previewBox         = document.getElementById('previewBox');
+const renderStatus       = document.getElementById('renderStatus');
+const btnPreview         = document.getElementById('btnPreview');
+const btnRender          = document.getElementById('btnRender');
+const btnStopPreview     = document.getElementById('btnStopPreview');
+const btnStopRender      = document.getElementById('btnStopRender');
+const renderDot          = document.getElementById('renderDot');
 
 /* ── API KEY TOGGLE ── */
 btnToggleKey.addEventListener('click', () => {
@@ -64,10 +58,6 @@ dropZone.addEventListener('keydown', e => {
 audioUpload.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 25 * 1024 * 1024) {
-        alert('File too large — OpenAI Whisper supports max 25 MB.');
-        return;
-    }
     stopEverything();
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     audioFile = file;
@@ -94,62 +84,61 @@ btnReset.addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════
-   STEP 3 — WHISPER TRANSCRIPTION
+   DEEPGRAM TRANSCRIPTION (FREE TIER)
+   • 200 hours free/month
+   • Word-level timestamps
+   • No credit card needed
+   Get key: console.deepgram.com
 ══════════════════════════════════════ */
 btnTranscribe.addEventListener('click', async () => {
     const key = apiKeyInput.value.trim();
-    if (!key) { alert('Please enter your OpenAI API key first.'); return; }
-    if (!audioFile) { alert('Please upload a song first.'); return; }
+    if (!key) { alert('Deepgram API key daalo pehle.\nMilegi: console.deepgram.com (free signup)'); return; }
+    if (!audioFile) { alert('Pehle song upload karo.'); return; }
 
     btnTranscribe.disabled = true;
     transcribeBtnLabel.textContent = '⏳ Transcribing…';
 
     try {
-        const formData = new FormData();
-        formData.append('file', audioFile, audioFile.name);
-        formData.append('model', 'whisper-1');
-        formData.append('response_format', 'verbose_json');
-        formData.append('timestamp_granularities[]', 'word');
-
-        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${key}` },
-            body: formData
-        });
+        /* Send audio file directly to Deepgram REST API */
+        const res = await fetch(
+            'https://api.deepgram.com/v1/listen?model=nova-2&language=multi&punctuate=true&words=true&utterances=false',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${key}`,
+                    'Content-Type': audioFile.type || 'audio/mpeg'
+                },
+                body: audioFile
+            }
+        );
 
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error?.message || `HTTP ${res.status}`);
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.err_msg || err.message || `HTTP ${res.status}`);
         }
 
         const data = await res.json();
+        const words = data?.results?.channels?.[0]?.alternatives?.[0]?.words;
 
-        /* Build segments from word-level timestamps */
-        if (data.words && data.words.length > 0) {
-            segments = data.words.map(w => ({
-                word:  w.word.trim(),
+        if (words && words.length > 0) {
+            segments = words.map(w => ({
+                word:  w.punctuated_word || w.word,
                 start: w.start,
                 end:   w.end
             }));
             lyricsHint.textContent = `✓ ${segments.length} words detected with timestamps.`;
-        } else if (data.segments) {
-            /* Fallback: segment-level (no per-word timing) */
-            segments = data.segments.map(s => ({
-                word:  s.text.trim(),
-                start: s.start,
-                end:   s.end
-            }));
-            lyricsHint.textContent = `⚠ Line-level only (no per-word timing). ${segments.length} lines.`;
         } else {
-            segments = [{ word: data.text, start: 0, end: 9999 }];
-            lyricsHint.textContent = '⚠ No timestamps found — single block mode.';
+            /* Fallback: full transcript as single block */
+            const text = data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
+            segments = [{ word: text || '(no speech detected)', start: 0, end: 9999 }];
+            lyricsHint.textContent = '⚠ No word timestamps — showing full transcript.';
         }
 
         lyricsEditor.value = segments.map(s => s.word).join(' ');
         lyricsBlock.classList.remove('hidden');
 
     } catch (err) {
-        alert('Transcription failed: ' + err.message);
+        alert('Transcription failed:\n' + err.message + '\n\nCheck karo key sahi hai ya nahi.\nconsole.deepgram.com pe jaake key copy karo.');
     } finally {
         btnTranscribe.disabled = false;
         transcribeBtnLabel.textContent = '✦ Detect Lyrics with AI';
@@ -203,58 +192,49 @@ function drawFrame(currentTime, bass, bgType, captionStyle) {
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
     }
 
-    if (segments.length === 0) return;
+    if (!segments.length) return;
 
-    const scale = 1 + (bass / 255) * 0.18; // subtle pulse
-
-    /* Find active word(s) */
-    const activeSegs = segments.filter(s => currentTime >= s.start && currentTime <= s.end);
-    const nextSeg    = segments.find(s => s.start > currentTime);
-
-    /* Also find recent past word for karaoke */
-    const pastSegs   = segments.filter(s => s.end < currentTime).slice(-3);
+    const scale    = 1 + (bass / 255) * 0.18;
+    const activeSeg= segments.filter(s => currentTime >= s.start && currentTime <= s.end);
+    const pastSegs  = segments.filter(s => s.end < currentTime).slice(-3);
+    const nextSeg   = segments.find(s => s.start > currentTime);
 
     ctx.save();
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
 
     if (captionStyle === 'word') {
-        /* ── WORD POP: one word at a time, large + punchy ── */
-        const seg = activeSegs[0];
+        const seg = activeSeg[0];
         if (seg) {
             const fs = Math.min(160, Math.max(80, CANVAS_W / Math.max(seg.word.length, 2) * 1.6)) * scale;
-            ctx.font      = `900 ${fs}px 'Bebas Neue', sans-serif`;
-            ctx.fillStyle = '#ffffff';
+            ctx.font        = `900 ${fs}px 'Bebas Neue', sans-serif`;
+            ctx.fillStyle   = '#ffffff';
             ctx.shadowBlur  = 30 * scale;
             ctx.shadowColor = 'rgba(255,255,255,0.6)';
             ctx.fillText(seg.word.toUpperCase(), CANVAS_W / 2, CANVAS_H / 2);
-            ctx.shadowBlur = 0;
+            ctx.shadowBlur  = 0;
         }
 
     } else if (captionStyle === 'line') {
-        /* ── LINE FADE: show current segment as a full line ── */
-        const line = activeSegs.map(s => s.word).join(' ') || (pastSegs.length ? pastSegs.map(s=>s.word).join(' ') : '');
+        const line = activeSeg.map(s => s.word).join(' ') ||
+                     pastSegs.map(s => s.word).join(' ');
         if (line) {
-            const words = line.split(' ');
             const fontSize = 72 * scale;
-            ctx.font      = `bold ${fontSize}px 'DM Mono', monospace`;
-            ctx.fillStyle = '#ffffff';
+            ctx.font        = `bold ${fontSize}px 'DM Mono', monospace`;
+            ctx.fillStyle   = '#ffffff';
             ctx.shadowBlur  = 20;
             ctx.shadowColor = 'rgba(0,0,0,0.7)';
-            /* Wrap text */
             wrapText(ctx, line, CANVAS_W / 2, CANVAS_H / 2, CANVAS_W - 80, fontSize * 1.3);
-            ctx.shadowBlur = 0;
+            ctx.shadowBlur  = 0;
         }
 
     } else if (captionStyle === 'karaoke') {
-        /* ── KARAOKE: past=grey, active=white+glow, next=dark ── */
-        const allVisible = [...pastSegs.slice(-2), ...activeSegs, ...(nextSeg ? [nextSeg] : [])];
-        const fontSize   = 68 * scale;
-        ctx.font         = `bold ${fontSize}px 'Bebas Neue', sans-serif`;
+        const allVis  = [...pastSegs.slice(-2), ...activeSeg, ...(nextSeg ? [nextSeg] : [])];
+        const fontSize= 68 * scale;
+        let y = CANVAS_H / 2 - (allVis.length / 2) * fontSize * 1.4;
 
-        let y = CANVAS_H / 2 - (allVisible.length / 2) * fontSize * 1.4;
-        for (const seg of allVisible) {
-            const isActive = activeSegs.includes(seg);
+        for (const seg of allVis) {
+            const isActive = activeSeg.includes(seg);
             const isPast   = seg.end < currentTime;
             if (isActive) {
                 ctx.fillStyle   = '#ffffff';
@@ -276,11 +256,11 @@ function drawFrame(currentTime, bass, bgType, captionStyle) {
         }
     }
 
-    /* Bass pulse ring (subtle, on top) */
+    /* Bass pulse ring */
     if (bass > 100) {
         ctx.beginPath();
         ctx.arc(CANVAS_W / 2, CANVAS_H / 2, 230 * scale, 0, 2 * Math.PI);
-        ctx.strokeStyle = `rgba(255,255,255,${(bass / 255) * 0.15})`;
+        ctx.strokeStyle = `rgba(255,255,255,${(bass / 255) * 0.12})`;
         ctx.lineWidth   = 8;
         ctx.stroke();
     }
@@ -288,7 +268,6 @@ function drawFrame(currentTime, bass, bgType, captionStyle) {
     ctx.restore();
 }
 
-/* Text wrap helper */
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     const words = text.split(' ');
     let line = '';
@@ -305,7 +284,7 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
 }
 
 /* ══════════════════════════════════════
-   PREVIEW (no recording)
+   PREVIEW
 ══════════════════════════════════════ */
 btnPreview.addEventListener('click', () => {
     if (!audioUrl) return;
@@ -321,16 +300,14 @@ btnPreview.addEventListener('click', () => {
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
     isRunning = true;
-    isRecording = false;
     previewBox.classList.remove('hidden');
-    renderStatus.textContent  = 'Previewing…';
-    renderDot.style.background = '#888';
+    renderStatus.textContent     = 'Previewing…';
+    renderDot.style.background   = '#888';
     btnStopPreview.style.display = '';
     btnStopRender.style.display  = 'none';
-    btnPreview.disabled = true;
+    btnPreview.disabled          = true;
 
-    activeAudio.play().catch(() => alert('Tap Preview again — browser needs a fresh tap.'));
-
+    activeAudio.play().catch(() => alert('Preview dobara tap karo.'));
     activeAudio.addEventListener('ended', () => {
         stopEverything();
         renderStatus.textContent = 'Preview ended.';
@@ -340,21 +317,18 @@ btnPreview.addEventListener('click', () => {
     let fc = 0;
     function loop() {
         if (!isRunning) return;
-        fc++;
-        if (fc % 2 === 0) { rafId = requestAnimationFrame(loop); return; }
+        if (++fc % 2 === 0) { rafId = requestAnimationFrame(loop); return; }
         analyser.getByteFrequencyData(dataArr);
-        const bass = (dataArr[0] + dataArr[1]) >> 1;
-        drawFrame(activeAudio.currentTime, bass, bgType, captionStyle);
+        drawFrame(activeAudio.currentTime, (dataArr[0]+dataArr[1])>>1, bgType, captionStyle);
         rafId = requestAnimationFrame(loop);
     }
     loop();
 });
 
-/* ── STOP PREVIEW ── */
 btnStopPreview.addEventListener('click', () => {
     stopEverything();
     renderStatus.textContent = 'Preview stopped.';
-    btnPreview.disabled      = false;
+    btnPreview.disabled = false;
 });
 
 /* ══════════════════════════════════════
@@ -374,23 +348,21 @@ btnRender.addEventListener('click', () => {
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
     previewBox.classList.remove('hidden');
-    renderStatus.textContent   = 'Recording…';
-    renderDot.style.background = '#f0f0f0';
+    renderStatus.textContent     = 'Recording…';
+    renderDot.style.background   = '#f0f0f0';
     btnStopPreview.style.display = 'none';
     btnStopRender.style.display  = '';
     btnRender.disabled = true;
-    isRunning   = true;
-    isRecording = true;
+    isRunning = isRecording = true;
 
-    /* MediaRecorder */
     const stream = canvas.captureStream(24);
-    const mimeTypes = ['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp8','video/webm'];
-    let chosenMime = '';
-    for (const m of mimeTypes) { if (MediaRecorder.isTypeSupported(m)) { chosenMime = m; break; } }
+    const mimes  = ['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp8','video/webm'];
+    let mime = '';
+    for (const m of mimes) { if (MediaRecorder.isTypeSupported(m)) { mime = m; break; } }
 
     let chunks = [];
-    mediaRecorder = chosenMime
-        ? new MediaRecorder(stream, { mimeType: chosenMime, videoBitsPerSecond: 800_000 })
+    mediaRecorder = mime
+        ? new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 800_000 })
         : new MediaRecorder(stream, { videoBitsPerSecond: 800_000 });
 
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
@@ -400,23 +372,18 @@ btnRender.addEventListener('click', () => {
         const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
         chunks = [];
         const url = URL.createObjectURL(blob);
-        const a   = document.createElement('a');
+        const a = document.createElement('a');
         a.href = url; a.download = `rhythm_captions.${ext}`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-        renderStatus.textContent = '✓ Done! Check your downloads.';
+        renderStatus.textContent = '✓ Done! Check downloads.';
         renderDot.style.background = '#888';
         btnRender.disabled = false;
         btnStopRender.style.display = 'none';
     };
 
     mediaRecorder.start(500);
-
-    activeAudio.play().catch(() => {
-        stopEverything();
-        alert('Tap Generate again — browser needs a fresh tap to start audio.');
-    });
-
+    activeAudio.play().catch(() => { stopEverything(); alert('Generate dobara tap karo.'); });
     activeAudio.addEventListener('ended', () => {
         isRunning = false;
         if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
@@ -426,17 +393,14 @@ btnRender.addEventListener('click', () => {
     let fc = 0;
     function loop() {
         if (!isRunning) return;
-        fc++;
-        if (fc % 2 === 0) { rafId = requestAnimationFrame(loop); return; }
+        if (++fc % 2 === 0) { rafId = requestAnimationFrame(loop); return; }
         analyser.getByteFrequencyData(dataArr);
-        const bass = (dataArr[0] + dataArr[1]) >> 1;
-        drawFrame(activeAudio ? activeAudio.currentTime : 0, bass, bgType, captionStyle);
+        drawFrame(activeAudio ? activeAudio.currentTime : 0, (dataArr[0]+dataArr[1])>>1, bgType, captionStyle);
         rafId = requestAnimationFrame(loop);
     }
     loop();
 });
 
-/* ── STOP & SAVE ── */
 btnStopRender.addEventListener('click', () => {
     isRunning = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
