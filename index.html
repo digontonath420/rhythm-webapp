@@ -13,13 +13,13 @@
 <div class="card">
     <header>
         <h1>RHYTHM <span>CAPTIONS</span></h1>
-        <p>Upload a song — AI detects lyrics & syncs captions to the beat</p>
+        <p>Upload a song — AI detects full lyrics &amp; syncs to beat</p>
     </header>
 
     <main>
 
         <!-- STEP 1: API KEY -->
-        <div class="step-block" id="stepApiKey">
+        <div class="step-block">
             <label for="apiKeyInput">Deepgram API Key <span class="tag">free — console.deepgram.com</span></label>
             <div class="input-row">
                 <input type="password" id="apiKeyInput" placeholder="Token xxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
@@ -31,21 +31,31 @@
         <hr class="divider">
 
         <!-- STEP 2: UPLOAD -->
-        <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload audio">
+        <div class="drop-zone" id="dropZone" tabindex="0" role="button">
             <input type="file" id="audioUpload" accept="audio/*" hidden>
             <div class="icon">🎵</div>
             <p>Tap to upload song</p>
-            <small>MP3 / AAC / OGG / M4A — max 25 MB</small>
+            <small>MP3 / AAC / OGG / M4A</small>
         </div>
 
-        <!-- After upload: file badge + settings -->
+        <!-- Controls -->
         <div class="hidden" id="controlsCard">
             <div class="file-badge">
                 <span id="fileInfo">file.mp3</span>
-                <button id="btnReset" class="btn-close" aria-label="Remove">&times;</button>
+                <button id="btnReset" class="btn-close">&times;</button>
             </div>
 
             <div class="settings-grid">
+                <div>
+                    <label for="songLang">Song Language</label>
+                    <select id="songLang">
+                        <option value="hi">Hindi / Urdu / Punjabi 🇮🇳</option>
+                        <option value="en">English 🇬🇧</option>
+                        <option value="ar">Arabic 🇸🇦</option>
+                        <option value="tr">Turkish 🇹🇷</option>
+                        <option value="multi">Auto Detect</option>
+                    </select>
+                </div>
                 <div>
                     <label for="bgType">Background</label>
                     <select id="bgType">
@@ -55,45 +65,53 @@
                     </select>
                 </div>
                 <div>
-                    <label for="songLang">Song Language</label>
-                    <select id="songLang">
-                        <option value="hi">Hindi / Urdu / Punjabi 🇮🇳</option>
-                        <option value="en">English 🇬🇧</option>
-                        <option value="ar">Arabic 🇸🇦</option>
-                        <option value="tr">Turkish 🇹🇷</option>
-                        <option value="multi">Auto Detect (Mixed)</option>
-                    </select>
-                </div>
-                <div>
                     <label for="captionStyle">Caption Style</label>
                     <select id="captionStyle">
-                        <option value="word">Word-by-word pop</option>
-                        <option value="line">Full line fade</option>
-                        <option value="karaoke">Karaoke highlight</option>
+                        <option value="word">Word Pop — ek word bada ho ke aata hai</option>
+                        <option value="bounce">Bounce — word beat pe uchhalta hai</option>
+                        <option value="typewriter">Typewriter — letter by letter type hota hai</option>
+                        <option value="karaoke">Karaoke — past/active/next highlight</option>
+                        <option value="line">Line Fade — poori line ek saath</option>
                     </select>
+                </div>
+
+                <!-- Vocal Boost toggle -->
+                <div class="toggle-row">
+                    <div>
+                        <p class="toggle-label">Vocal Boost</p>
+                        <p class="toggle-sub">Music ko kam karo, vocals boost karo (better transcription)</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="vocalBoost" checked>
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
-            <!-- Transcribe button -->
-            <button class="btn btn-primary full" id="btnTranscribe">
+            <!-- Progress bar -->
+            <div class="progress-wrap" id="progressWrap" style="display:none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p class="hint" id="progressLabel" style="text-align:center; margin-top:6px;"></p>
+
+            <button class="btn btn-primary full" id="btnTranscribe" style="margin-top:14px;">
                 <span id="transcribeBtnLabel">✦ Detect Lyrics with AI</span>
             </button>
         </div>
 
-        <!-- Transcription result -->
+        <!-- Lyrics result -->
         <div class="hidden" id="lyricsPreviewBlock">
             <hr class="divider">
             <label>Detected Lyrics <span class="tag">tap to edit</span></label>
             <textarea id="lyricsEditor" rows="6" spellcheck="true"></textarea>
             <p class="hint" id="lyricsHint"></p>
-
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="btnPreview">▶ Preview</button>
                 <button class="btn btn-primary"   id="btnRender">Generate ↓</button>
             </div>
         </div>
 
-        <!-- Canvas preview -->
+        <!-- Canvas -->
         <div class="preview-box hidden" id="previewBox">
             <hr class="divider">
             <canvas id="videoCanvas" width="540" height="960"></canvas>
